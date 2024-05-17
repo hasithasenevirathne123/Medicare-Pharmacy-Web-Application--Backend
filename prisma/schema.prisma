@@ -1,0 +1,168 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model user_type {
+    id        Int      @id @default(autoincrement())
+    name      String?
+    is_active Boolean? @default(true)
+    user      user[]
+}
+
+model user {
+    id           Int        @id @default(autoincrement())
+    email        String?    @unique
+    password     String?
+    is_active    Boolean?   @default(true)
+    created_at   DateTime   @default(now())
+    updated_at   DateTime   @updatedAt
+    user_type    user_type? @relation(fields: [user_type_id], references: [id])
+    user_type_id Int?
+    customer     customer[]
+    admin        admin[]
+}
+
+model customer {
+    id             Int      @id @default(autoincrement())
+    first_name     String?
+    last_name      String?
+    mobile_number  String?
+    street_address String?
+    city           String?
+    nic            String?
+    gender         String?
+    user           user?    @relation(fields: [user_id], references: [id])
+    user_id        Int?
+    image          String?
+    is_active      Boolean? @default(true)
+    created_at     DateTime @default(now())
+    updated_at     DateTime @updatedAt
+    order          order[]
+
+    cart         cart[]
+    prescription prescription[]
+}
+
+model admin {
+    id             Int      @id @default(autoincrement())
+    first_name     String?
+    last_name      String?
+    mobile_number  String?
+    street_address String?
+    city           String?
+    nic            String?
+    gender         String?
+    user           user?    @relation(fields: [user_id], references: [id])
+    user_id        Int?
+    image          String?
+    is_active      Boolean? @default(true)
+    created_at     DateTime @default(now())
+    updated_at     DateTime @updatedAt
+}
+
+model category {
+    id            Int       @id @default(autoincrement())
+    category_name String?
+    is_active     Boolean?  @default(true)
+    created_at    DateTime  @default(now())
+    updated_at    DateTime  @updatedAt
+    image         String?
+    product       product[]
+}
+
+model product {
+    id            Int             @id @default(autoincrement())
+    product_name  String?
+    category      category?       @relation(fields: [category_id], references: [id])
+    category_id   Int?
+    image         String?
+    created_at    DateTime        @default(now())
+    updated_at    DateTime        @updatedAt
+    stock         Int?
+    price         Decimal?
+    description   String?         @db.VarChar(500)
+    order_details order_details[]
+    cart          cart[]
+    is_active     Boolean?        @default(true)
+    brand         String?
+    rating        Float?
+    sold          Int?            @default(0)
+}
+
+model order {
+    id            Int             @id @default(autoincrement())
+    created_at    DateTime        @default(now())
+    updated_at    DateTime        @updatedAt
+    amount        Decimal?
+    is_active     Boolean?        @default(true)
+    order_details order_details[]
+    customer      customer?       @relation(fields: [customer_id], references: [id])
+    customer_id   Int?
+    tax           Decimal?
+    payment       payment?        @relation(fields: [payment_id], references: [id])
+    payment_id    Int?
+    order_status  String?
+    date_receive  DateTime?
+}
+
+model order_details {
+    id         Int      @id @default(autoincrement())
+    product    product? @relation(fields: [product_id], references: [id])
+    product_id Int?
+    order      order?   @relation(fields: [order_id], references: [id])
+    order_id   Int?
+    is_active  Boolean? @default(true)
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+    quantity   Int?
+    price      Decimal?
+    tax        Decimal?
+}
+
+model payment {
+    id             Int      @id @default(autoincrement())
+    created_at     DateTime @default(now())
+    updated_at     DateTime @updatedAt
+    is_active      Boolean? @default(true)
+    payment_method String?
+    amount         Decimal?
+    data           String?
+    action         String?
+    order          order[]
+    status         String?
+}
+
+model cart {
+    id          Int       @id @default(autoincrement())
+    created_at  DateTime  @default(now())
+    updated_at  DateTime  @updatedAt
+    is_active   Boolean?  @default(true)
+    customer    customer? @relation(fields: [customer_id], references: [id])
+    customer_id Int?
+    product     product?  @relation(fields: [product_id], references: [id])
+    product_id  Int?
+    quantity    Int?
+}
+
+model prescription {
+    id                Int       @id @default(autoincrement())
+    created_at        DateTime  @default(now())
+    updated_at        DateTime  @updatedAt
+    is_active         Boolean?  @default(true)
+    customer          customer? @relation(fields: [customer_id], references: [id])
+    customer_id       Int?
+    frequency         String?
+    fulfilment        String?
+    substitutes       String?
+    prescription_item String?   @db.VarChar(1000)
+    image             String?
+    payment_method    String?
+    refund            String?
+    shipping_address  String?
+    status            String?
+}

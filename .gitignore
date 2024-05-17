@@ -1,0 +1,9 @@
+node_modules
+package-lock.json
+migrations
+requests.log
+admin_images
+user_images
+product_images
+prescriptions
+category_images
